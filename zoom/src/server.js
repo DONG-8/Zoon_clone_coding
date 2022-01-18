@@ -33,13 +33,33 @@ wss.on("connection", (socket) => {
   // 서버로부터 메세지 받기
   // 창이 닫아지면
   socket.on("close", () => console.log("클라이언트로부터 연결끊김"));
-  sockets.pust(socket); // 소켓에 대한 정보가 들어감
-  socket.on("message", (message) => {
+  sockets.push(socket); // 소켓에 대한 정보가 들어감
+  socket["nickname"] = "Anon";
+  socket.on("message", (msg) => {
     // console.log(message.toString('utf8'))
     // socket.send(message.toString('utf8'))
-    sockets.forEach((aSocket) => {
-      aSocket.send(message.toString("utf8"));
-    });
+    // console.log(message.toString("utf8"));
+    // console.log(parsed);
+    //  if문 switch로 변경
+    // if (parsed.type === "new_message") {
+    //   sockets.forEach((aSocket) => {
+    //     aSocket.send(parsed.payload);
+    //   });
+    // } else if (parsed.type === "nickname") {
+    //   console.log(parsed.payload);
+    // }
+    const message = JSON.parse(msg);
+    switch (message.type) {
+      case "new_message":
+        sockets.forEach((aSocket) => {
+          aSocket.send(`${socket.nickname} : ${message.payload}`);
+        });
+        break;
+      case "nickname":
+        // console.log(message.payload);
+        socket["nickname"] = message.payload;
+        break;
+    }
   });
 });
 // socket을 반납 받는다.. 연결된 브라우저와의 contact 라인이다.

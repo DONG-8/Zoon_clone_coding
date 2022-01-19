@@ -930,3 +930,189 @@ websocket 이 브라우저에 있는 api 이기 때문이다.
 
 
 나를 제외하고 다른사람 모두에게 메세지를 보내는 방법도 있을 것이다.
+
+
+
+이제 이걸 쉽게 해주는 framework를 배워보자
+
+
+
+---
+
+
+
+## Course 2
+
+
+
+### 2.0  SocketIO VS WebSockets
+
+socket io는 websocket를 실행하는게 아니다
+
+framework : 실시간, 양방향, event 기반 통신 제공
+
+탄력성이 뛰어나다
+
+
+
+socket io는 websocket의 부가기능이 아니다.
+
+가끔 이걸 이용해서 통신제공하는 방법이다.
+
+안되더라도 다른방법을 이용해서 제공한다.
+
+
+
+### 2.1 installing SocketIo
+
+socket.io install
+
+```bash
+$ npm i socket.io
+```
+
+socket.io 에서 제공하는 주소
+
+http://localhost:3000/socket.io/socket.io.js
+
+
+
+client에도 설치 -> 웹소켓은 설치 필요 없었지만 그 이상의 기능을 제공하기 때문에 양측에 설치를 해 주어야 합니다.
+
+
+
+html 파일에도 script로 설치 해 주어야 합니다
+
+```html
+<script src="/socket.io/socket.io.js"> </script>
+```
+
+pug파일의 경우
+
+```pug
+script(src="/socket.io/socket.io.js") 
+```
+
+
+
+app.js
+
+```javascript
+const socket = io();
+// 자동적으로 back-end socket.io와 연결해주는 function
+```
+
+
+
+### 2.2 SocketIO is Amazing
+
+
+
+room 개념에 대해서 설명 해 줄게용!
+
+룸 개념을 소켓  io 를 통해 참여 나가기가 쌉가능
+
+이걸 통해서 다른 기능도 배울  수 있다.
+
+
+
+app.js
+
+```javascript
+function handleRoomSubmit(event) {
+  event.preventDefault();
+  const input = form.querySelector("input");
+  socket.emit("enter_room", {payload: input.value});
+  input.value = "";
+}
+```
+
+
+
+:ballot_box_with_check: `socket.emit()` : 항상 메세지를 보낼 필요가 없음
+
+emit(이벤트,argument ) 
+
+argument 는 object가 될 수 있다.
+
+얼마든지 원하는 값을 한번에 보낼 수 있다! 이는 매우 유용하다
+
+room 메세지를 보내고있는데 받았을 때는 어떻게 처리될까?
+
+
+
+server.js 받는법
+
+```javascript
+io.on("connection", (socket) => {
+  // console.log(socket); // 커넥션받을 준비 완료
+  socket.on("enter_room", (msg) => console.log(msg));
+});
+```
+
+"room" 자리에는 어떤 event든지 간에 넣을 수 있다.유용 1
+
+js object를 전송할 수 있게 되었다!!
+
+emit 이외에도 정말 유용한 이벤트들이 있다!!
+
+
+
+ :ballot_box_with_check: emit(event, argument, callback)
+
+
+
+callback ==> 서버에서 호출하는 function이 들어가게 됩니다.
+
+**서버에 있는 function을호출할 수 있다는건 엄청난 일입니다...!!**
+
+
+
+server.js
+
+```javascript
+io.on("connection", (socket) => {
+  // console.log(socket); // 커넥션받을 준비 완료
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    setTimeout(() => {
+      done();
+    }, 10000);
+  });
+```
+
+
+
+app.js
+
+```javascript
+function handleRoomSubmit(event) {
+  event.preventDefault();
+  const input = form.querySelector("input");
+  socket.emit("enter_room", { payload: input.value }, () =>
+    console.log("server is done")
+  );
+  input.value = "";
+}
+```
+
+
+
+세번째 인자의 console.log() 시키는 함수가 server에서 done 이라는 이름으로 받아지고 server 에서 front 의 함수를 실행시킬 수 있게 되었다!
+
+amazing
+
+이건 여기서 보낸 요청에 대해서 backend에서 처리를 하고, 다시 front에 요청을 보낼 수 있다.
+
+그렇다는건 받은 메세지를 처리하고 저기에도 똑같은 메세지를 돌려주게 하는것이 이 하나로 가능하다는것으로 보인다.
+
+
+
+### 2.3 Recap
+
+끝날때 실행되고 싶은 명령이 있으면 가장 마지막에보내 주어야 한다.!!
+
+
+
+### 2.4 
+
